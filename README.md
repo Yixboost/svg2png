@@ -26,3 +26,7 @@ Check out the live demo [here](http://yixboost.github.io/svg2png).
 ## License 📄
 
 This project is licensed under the GNU General Public License (GPL) - see the [LICENSE](LICENSE) file for details.
+
+---
+
+Created with ⚡ by Jonasvanleeuwen19

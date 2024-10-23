@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>SVG to PNG Converter</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+		}
+
+		:root {
+			--primary: #3b82f6;
+			--primary-dark: #2563eb;
+			--background: #0f172a;
+			--secondary-bg: #1e293b;
+			--text: #e2e8f0;
+			--text-secondary: #94a3b8;
+			--border: #334155;
+			--success: #10b981;
+			--success-dark: #059669;
+		}
+
+		body {
+			min-height: 100vh;
+			background: var(--background);
+			color: var(--text);
+			line-height: 1.6;
+		}
+
+		.header {
+			background: var(--secondary-bg);
+			border-bottom: 1px solid var(--border);
+			padding: 1rem 0;
+			position: fixed;
+			width: 100%;
+			top: 0;
+			z-index: 1000;
+			box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		}
+
+		.header-content {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 0 2rem;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		.logo {
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+			color: var(--primary);
+			font-weight: 700;
+			font-size: 1.5rem;
+		}
+
+		.logo svg {
+			width: 2rem;
+			height: 2rem;
+		}
+
+		main {
+			max-width: 1200px;
+			margin: 7rem auto 2rem;
+			padding: 0 2rem;
+		}
+
+		.container {
+			display: flex;
+			/* Align SVG preview and controls side by side */
+			margin-top: 2rem;
+			/* Add space from the title */
+		}
+
+		.upload-section {
+			border: 2px dashed var(--border);
+			border-radius: 12px;
+			padding: 3rem;
+			text-align: center;
+			margin-bottom: 2rem;
+			transition: all 0.3s ease;
+			background: var(--background);
+		}
+
+		.upload-section:hover {
+			border-color: var(--primary);
+			background: rgba(59, 130, 246, 0.1);
+		}
+
+		#svg-file-input {
+			display: none;
+		}
+
+		.upload-label {
+			display: inline-block;
+			padding: 1rem 2rem;
+			background: var(--primary);
+			color: white;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			font-weight: 500;
+			box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+		}
+
+		.upload-label:hover {
+			background: var(--primary-dark);
+			transform: translateY(-2px);
+			box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.3);
+		}
+
+		#currentDimensions {
+			background: var(--background);
+			padding: 1rem;
+			border-radius: 8px;
+			margin-bottom: 1.5rem;
+			border: 1px solid var(--border);
+			color: var(--text-secondary);
+			width: 100%;
+		}
+
+		#resizeForm {
+			margin-bottom: 1rem;
+			/* Adjust margin */
+			display: flex;
+			/* Change to flex */
+			align-items: center;
+			/* Align items vertically */
+			justify-content: flex-start;
+			/* Align items to start */
+			gap: 1rem;
+			/* Add space between elements */
+		}
+
+		#forminputs {
+			display: flex;
+			/* Change to flex */
+			gap: 1rem;
+			/* Add space between input fields */
+			align-items: center;
+			/* Align items vertically */
+		}
+
+		label {
+			color: var(--text-secondary);
+			font-weight: 500;
+		}
+
+		input[type="number"] {
+			padding: 0.75rem 1rem;
+			background: var(--background);
+			border: 1px solid var(--border);
+			border-radius: 6px;
+			color: var(--text);
+			width: 120px;
+			transition: all 0.3s ease;
+		}
+
+		input[type="number"]:focus {
+			border-color: var(--primary);
+			outline: none;
+			box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+		}
+
+		button {
+			padding: 0.75rem 1.5rem;
+			border: none;
+			border-radius: 6px;
+			background: var(--success);
+			color: white;
+			cursor: pointer;
+			font-weight: 500;
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+		}
+
+		button:hover {
+			background: var(--success-dark);
+			transform: translateY(-2px);
+			box-shadow: 0 6px 8px -1px rgba(16, 185, 129, 0.3);
+		}
+
+		#convertToPngBtn {
+			background: var(--primary);
+			box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+			padding: 1rem 2rem;
+			width: 100%;
+		}
+
+		#convertToPngBtn:hover {
+			background: var(--primary-dark);
+			box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.3);
+		}
+
+		#svgContainer {
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: var(--background);
+			transition: all 0.3s ease;
+			flex: 1;
+			margin-right: 2rem;
+		}
+
+		#controls {
+			display: flex;
+			flex-direction: column;
+			flex: 0 0 300px;
+			align-items: stretch;
+		}
+
+		#svgContainer:hover {
+			border-color: var(--primary);
+		}
+
+		#svgContainer svg {
+			width: 30%;
+			height: 50%;
+		}
+
+		.features {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+			gap: 2rem;
+			margin-top: 3rem;
+		}
+
+		.feature-card {
+			background: var(--background);
+			padding: 1.5rem;
+			border-radius: 12px;
+			border: 1px solid var(--border);
+			transition: all 0.3s ease;
+		}
+
+		.feature-card:hover {
+			transform: translateY(-5px);
+			border-color: var(--primary);
+		}
+
+		.feature-icon {
+			color: var(--primary);
+			font-size: 1.5rem;
+			margin-bottom: 1rem;
+		}
+	</style>
+</head>
+
+<body>
+	<header class="header">
+		<div class="header-content">
+			<div class="logo">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+					<path fill="none" d="M0 0h24v24H0z" />
+					<path fill="currentColor"
+						d="M12 2C6.48 2 2 6.48 2 12c0 5.52 4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+				</svg>
+				SVG to PNG Converter
+			</div>
+		</div>
+	</header>
+	<main>
+		<div class="container">
+			<div id="svgContainer">
+				<!-- Placeholder for SVG preview -->
+				<svg id="svgPreview" width="200" height="200">
+					<rect width="100%" height="100%" fill="lightgray" />
+					<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="black">Preview</text>
+				</svg>
+			</div>
+			<div id="controls">
+				<div class="upload-section">
+					<label class="upload-label" for="svg-file-input">Upload SVG File</label>
+					<input id="svg-file-input" type="file" accept=".svg" />
+				</div>
+				<div id="currentDimensions"></div>
+				<form id="resizeForm">
+					<div id="forminputs">
+						<label for="widthInput">Width:</label>
+						<input type="number" id="widthInput" placeholder="Width" />
+						<label for="heightInput">Height:</label>
+						<input type="number" id="heightInput" placeholder="Height" />
+					</div>
+					<button type="submit">Resize</button>
+				</form>
+				<!-- Move the button below the form -->
+				<button id="convertToPngBtn">Convert to PNG</button>
+			</div>
+		</div>
+		<section id="features">
+			<h2>Features</h2>
+			<div class="features">
+				<div class="feature-card">
+					<div class="feature-icon">🌟</div>
+					<h3>Easy to Use</h3>
+					<p>Our converter is simple and intuitive, allowing you to quickly convert SVG files to PNG.</p>
+				</div>
+				<div class="feature-card">
+					<div class="feature-icon">⚡</div>
+					<h3>Fast Conversion</h3>
+					<p>Experience lightning-fast conversion speeds with our powerful backend.</p>
+				</div>
+				<div class="feature-card">
+					<div class="feature-icon">🔒</div>
+					<h3>Secure</h3>
+					<p>Your files are safe with us. We don’t store your uploaded files.</p>
+				</div>
+			</div>
+		</section>
+	</main>
+	<script src="app.js"></script>
+</body>
+
+</html>
